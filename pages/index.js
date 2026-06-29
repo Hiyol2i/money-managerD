@@ -1,6 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 
 export default function Home() {
   const [balance, setBalance] = useState(0);
@@ -11,6 +19,24 @@ export default function Home() {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("อาหาร");
   const [note, setNote] = useState("");
+
+  /* 💾 LOAD DATA */
+  useEffect(() => {
+    const saved = localStorage.getItem("money-data");
+    if (saved) {
+      const data = JSON.parse(saved);
+      setItems(data.items || []);
+      setBalance(data.balance || 0);
+    }
+  }, []);
+
+  /* 💾 SAVE DATA */
+  useEffect(() => {
+    localStorage.setItem(
+      "money-data",
+      JSON.stringify({ balance, items })
+    );
+  }, [balance, items]);
 
   function addItem() {
     if (!amount) return;
@@ -45,24 +71,36 @@ export default function Home() {
         text: "black"
       };
 
+  /* 📊 CHART DATA */
+  const chartData = [
+    {
+      name: "Income",
+      value: items
+        .filter((i) => i.type === "income")
+        .reduce((a, b) => a + b.amount, 0)
+    },
+    {
+      name: "Expense",
+      value: items
+        .filter((i) => i.type === "expense")
+        .reduce((a, b) => a + b.amount, 0)
+    }
+  ];
+
   return (
     <div style={{ ...styles.bg, background: theme.bg, color: theme.text }}>
-
       <div style={styles.container}>
 
         {/* TOP BAR */}
         <div style={styles.topbar}>
           <h1 style={styles.title}>Money Manager</h1>
 
-          <button
-            onClick={() => setDark(!dark)}
-            style={styles.toggle}
-          >
+          <button onClick={() => setDark(!dark)} style={styles.toggle}>
             {dark ? "🌙" : "☀️"}
           </button>
         </div>
 
-        {/* BALANCE CARD (Apple Wallet Style) */}
+        {/* BALANCE */}
         <div style={{ ...styles.balanceCard, background: theme.card }}>
           <p style={{ opacity: 0.6 }}>Balance</p>
           <h2 style={{ fontSize: 36 }}>
@@ -70,7 +108,7 @@ export default function Home() {
           </h2>
         </div>
 
-        {/* INPUT CARD */}
+        {/* FORM */}
         <div style={{ ...styles.card, background: theme.card }}>
 
           <select value={type} onChange={(e) => setType(e.target.value)} style={styles.input}>
@@ -104,20 +142,19 @@ export default function Home() {
           </button>
         </div>
 
-        {/* MINI STATS (Fake Chart Style) */}
-        <div style={styles.chartCard}>
-          <div style={styles.bar}>
-            <div style={{ ...styles.incomeBar, height: Math.min(balance > 0 ? balance / 10 : 10, 120) }} />
-            <p>Income</p>
-          </div>
-
-          <div style={styles.bar}>
-            <div style={{ ...styles.expenseBar, height: Math.min(balance < 0 ? -balance / 10 : 20, 120) }} />
-            <p>Expense</p>
-          </div>
+        {/* 📊 REAL CHART */}
+        <div style={styles.chartBox}>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={chartData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#6366f1" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
-        {/* LIST with animation feel */}
+        {/* LIST */}
         <div style={{ marginTop: 20 }}>
           {items.map((item) => (
             <div key={item.id} style={styles.item}>
@@ -141,15 +178,14 @@ export default function Home() {
   );
 }
 
-/* STYLE SYSTEM */
+/* 🎨 STYLE */
 const styles = {
   bg: {
     minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
     padding: 20,
-    fontFamily: "sans-serif",
-    transition: "0.3s"
+    fontFamily: "sans-serif"
   },
   container: {
     width: "100%",
@@ -162,22 +198,19 @@ const styles = {
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    letterSpacing: 1
+    fontWeight: "bold"
   },
   toggle: {
     border: "none",
     padding: 10,
     borderRadius: 12,
-    background: "rgba(255,255,255,0.1)",
     cursor: "pointer"
   },
   balanceCard: {
     padding: 20,
     borderRadius: 20,
     marginTop: 10,
-    backdropFilter: "blur(20px)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+    backdropFilter: "blur(20px)"
   },
   card: {
     padding: 15,
@@ -208,31 +241,12 @@ const styles = {
     background: "rgba(255,255,255,0.08)",
     backdropFilter: "blur(10px)",
     display: "flex",
-    justifyContent: "space-between",
-    transition: "0.3s"
+    justifyContent: "space-between"
   },
-  chartCard: {
-    display: "flex",
-    justifyContent: "space-around",
+  chartBox: {
     marginTop: 20,
     padding: 15,
     borderRadius: 20,
     background: "rgba(255,255,255,0.05)"
-  },
-  bar: {
-    width: 80,
-    textAlign: "center"
-  },
-  incomeBar: {
-    width: "100%",
-    background: "#22c55e",
-    borderRadius: 10,
-    transition: "0.3s"
-  },
-  expenseBar: {
-    width: "100%",
-    background: "#ef4444",
-    borderRadius: 10,
-    transition: "0.3s"
   }
 };
