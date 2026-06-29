@@ -16,6 +16,25 @@ function isThai(text) {
   return /[\u0E00-\u0E7F]/.test(text);
 }
 
+/* ✨ แยกคำ + ฟอนต์ */
+function renderMixedFont(text) {
+  if (!text) return null;
+
+  return text.split(" ").map((word, i) => (
+    <span
+      key={i}
+      style={{
+        fontFamily: isThai(word)
+          ? "UIDWanThong, sans-serif"
+          : "Old Standard TT, serif",
+        marginRight: 4
+      }}
+    >
+      {word}
+    </span>
+  ));
+}
+
 export default function Home() {
   const [balance, setBalance] = useState(0);
   const [items, setItems] = useState([]);
@@ -91,21 +110,19 @@ export default function Home() {
   return (
     <>
       <Head>
-
-        {/* 🌍 English font */}
+        {/* 🌍 Old Standard TT (English luxury font) */}
         <link
           href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap"
           rel="stylesheet"
         />
 
-        {/* ⚠️ UID Wan Thong (ต้องมีไฟล์ font จริง ถ้าไม่มีจะ fallback) */}
+        {/* 🇹🇭 UID Wan Thong (ต้องมีไฟล์ font จริงใน /public/fonts) */}
         <style>{`
           @font-face {
             font-family: "UIDWanThong";
             src: url("/fonts/UIDWanThong.woff2") format("woff2");
           }
         `}</style>
-
       </Head>
 
       <div style={{ ...styles.bg, background: theme.bg, color: theme.text }}>
@@ -150,7 +167,7 @@ export default function Home() {
             </select>
 
             <input
-              placeholder="Note (ไทย/ENG ได้)"
+              placeholder="Note"
               value={note}
               onChange={(e)=>setNote(e.target.value)}
               style={styles.input}
@@ -176,23 +193,14 @@ export default function Home() {
           {/* LIST */}
           <div style={{ marginTop: 20 }}>
             {items.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  ...styles.item,
-
-                  // 🧠 FONT SWITCH (สำคัญ)
-                  fontFamily: isThai(item.note)
-                    ? "UIDWanThong, sans-serif"
-                    : "Old Standard TT, serif"
-                }}
-              >
+              <div key={item.id} style={styles.item}>
                 <div>
                   <b>
                     {item.type === "income" ? "🟢 +" : "🔴 -"} {item.amount} ฿
                   </b>
+
                   <p style={{ margin: 0, opacity: 0.7 }}>
-                    {item.category} • {item.note}
+                    {renderMixedFont(item.category)} • {renderMixedFont(item.note)}
                   </p>
                 </div>
 
