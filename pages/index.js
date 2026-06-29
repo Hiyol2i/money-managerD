@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Head from "next/head";
 import {
   BarChart,
   Bar,
@@ -9,6 +10,11 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+
+/* 🧠 ตรวจภาษาไทย */
+function isThai(text) {
+  return /[\u0E00-\u0E7F]/.test(text);
+}
 
 export default function Home() {
   const [balance, setBalance] = useState(0);
@@ -20,7 +26,7 @@ export default function Home() {
   const [category, setCategory] = useState("อาหาร");
   const [note, setNote] = useState("");
 
-  /* 💾 LOAD DATA */
+  /* 💾 load */
   useEffect(() => {
     const saved = localStorage.getItem("money-data");
     if (saved) {
@@ -30,7 +36,7 @@ export default function Home() {
     }
   }, []);
 
-  /* 💾 SAVE DATA */
+  /* 💾 save */
   useEffect(() => {
     localStorage.setItem(
       "money-data",
@@ -71,114 +77,139 @@ export default function Home() {
         text: "black"
       };
 
-  /* 📊 CHART DATA */
   const chartData = [
     {
       name: "Income",
-      value: items
-        .filter((i) => i.type === "income")
-        .reduce((a, b) => a + b.amount, 0)
+      value: items.filter(i => i.type === "income").reduce((a,b)=>a+b.amount,0)
     },
     {
       name: "Expense",
-      value: items
-        .filter((i) => i.type === "expense")
-        .reduce((a, b) => a + b.amount, 0)
+      value: items.filter(i => i.type === "expense").reduce((a,b)=>a+b.amount,0)
     }
   ];
 
   return (
-    <div style={{ ...styles.bg, background: theme.bg, color: theme.text }}>
-      <div style={styles.container}>
+    <>
+      <Head>
 
-        {/* TOP BAR */}
-        <div style={styles.topbar}>
-          <h1 style={styles.title}>Money Manager</h1>
+        {/* 🌍 English font */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
 
-          <button onClick={() => setDark(!dark)} style={styles.toggle}>
-            {dark ? "🌙" : "☀️"}
-          </button>
-        </div>
+        {/* ⚠️ UID Wan Thong (ต้องมีไฟล์ font จริง ถ้าไม่มีจะ fallback) */}
+        <style>{`
+          @font-face {
+            font-family: "UIDWanThong";
+            src: url("/fonts/UIDWanThong.woff2") format("woff2");
+          }
+        `}</style>
 
-        {/* BALANCE */}
-        <div style={{ ...styles.balanceCard, background: theme.card }}>
-          <p style={{ opacity: 0.6 }}>Balance</p>
-          <h2 style={{ fontSize: 36 }}>
-            {balance.toLocaleString()} ฿
-          </h2>
-        </div>
+      </Head>
 
-        {/* FORM */}
-        <div style={{ ...styles.card, background: theme.card }}>
+      <div style={{ ...styles.bg, background: theme.bg, color: theme.text }}>
+        <div style={styles.container}>
 
-          <select value={type} onChange={(e) => setType(e.target.value)} style={styles.input}>
-            <option value="income">➕ Income</option>
-            <option value="expense">➖ Expense</option>
-          </select>
+          {/* TOP */}
+          <div style={styles.topbar}>
+            <h1 style={styles.title}>Money Manager</h1>
+            <button onClick={() => setDark(!dark)} style={styles.toggle}>
+              {dark ? "🌙" : "☀️"}
+            </button>
+          </div>
 
-          <input
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            style={styles.input}
-          />
+          {/* BALANCE */}
+          <div style={{ ...styles.balanceCard, background: theme.card }}>
+            <p style={{ opacity: 0.6 }}>Balance</p>
+            <h2 style={{ fontSize: 36 }}>
+              {balance.toLocaleString()} ฿
+            </h2>
+          </div>
 
-          <select value={category} onChange={(e) => setCategory(e.target.value)} style={styles.input}>
-            <option>🍔 Food</option>
-            <option>🚗 Transport</option>
-            <option>📚 Study</option>
-            <option>🛍 Shopping</option>
-          </select>
+          {/* FORM */}
+          <div style={{ ...styles.card, background: theme.card }}>
 
-          <input
-            placeholder="Note"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            style={styles.input}
-          />
+            <select value={type} onChange={(e)=>setType(e.target.value)} style={styles.input}>
+              <option value="income">➕ Income</option>
+              <option value="expense">➖ Expense</option>
+            </select>
 
-          <button onClick={addItem} style={styles.button}>
-            ✨ Add Transaction
-          </button>
-        </div>
+            <input
+              placeholder="Amount"
+              value={amount}
+              onChange={(e)=>setAmount(e.target.value)}
+              style={styles.input}
+            />
 
-        {/* 📊 REAL CHART */}
-        <div style={styles.chartBox}>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#6366f1" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+            <select value={category} onChange={(e)=>setCategory(e.target.value)} style={styles.input}>
+              <option>🍔 Food</option>
+              <option>🚗 Transport</option>
+              <option>📚 Study</option>
+              <option>🛍 Shopping</option>
+            </select>
 
-        {/* LIST */}
-        <div style={{ marginTop: 20 }}>
-          {items.map((item) => (
-            <div key={item.id} style={styles.item}>
-              <div>
-                <b>
-                  {item.type === "income" ? "🟢 +" : "🔴 -"} {item.amount} ฿
-                </b>
-                <p style={{ margin: 0, opacity: 0.7 }}>
-                  {item.category} • {item.note}
-                </p>
+            <input
+              placeholder="Note (ไทย/ENG ได้)"
+              value={note}
+              onChange={(e)=>setNote(e.target.value)}
+              style={styles.input}
+            />
+
+            <button onClick={addItem} style={styles.button}>
+              ✨ Add Transaction
+            </button>
+          </div>
+
+          {/* CHART */}
+          <div style={styles.chartBox}>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#6366f1" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* LIST */}
+          <div style={{ marginTop: 20 }}>
+            {items.map((item) => (
+              <div
+                key={item.id}
+                style={{
+                  ...styles.item,
+
+                  // 🧠 FONT SWITCH (สำคัญ)
+                  fontFamily: isThai(item.note)
+                    ? "UIDWanThong, sans-serif"
+                    : "Old Standard TT, serif"
+                }}
+              >
+                <div>
+                  <b>
+                    {item.type === "income" ? "🟢 +" : "🔴 -"} {item.amount} ฿
+                  </b>
+                  <p style={{ margin: 0, opacity: 0.7 }}>
+                    {item.category} • {item.note}
+                  </p>
+                </div>
+
+                <span style={{ fontSize: 11, opacity: 0.5 }}>
+                  {item.time}
+                </span>
               </div>
-              <span style={{ fontSize: 11, opacity: 0.5 }}>
-                {item.time}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-/* 🎨 STYLE */
+/* STYLE */
 const styles = {
   bg: {
     minHeight: "100vh",
@@ -187,37 +218,23 @@ const styles = {
     padding: 20,
     fontFamily: "sans-serif"
   },
-  container: {
-    width: "100%",
-    maxWidth: 420
-  },
-  topbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold"
-  },
-  toggle: {
-    border: "none",
-    padding: 10,
-    borderRadius: 12,
-    cursor: "pointer"
-  },
+  container: { width: "100%", maxWidth: 420 },
+  topbar: { display: "flex", justifyContent: "space-between" },
+  title: { fontSize: 22, fontWeight: "bold" },
+  toggle: { border: "none", padding: 10, borderRadius: 12 },
+
   balanceCard: {
     padding: 20,
     borderRadius: 20,
-    marginTop: 10,
-    backdropFilter: "blur(20px)"
+    marginTop: 10
   },
+
   card: {
     padding: 15,
     borderRadius: 20,
-    marginTop: 15,
-    backdropFilter: "blur(20px)"
+    marginTop: 15
   },
+
   input: {
     width: "100%",
     padding: 10,
@@ -225,6 +242,7 @@ const styles = {
     borderRadius: 12,
     border: "none"
   },
+
   button: {
     width: "100%",
     padding: 12,
@@ -234,15 +252,16 @@ const styles = {
     color: "white",
     fontWeight: "bold"
   },
+
   item: {
     padding: 12,
     marginTop: 10,
     borderRadius: 16,
     background: "rgba(255,255,255,0.08)",
-    backdropFilter: "blur(10px)",
     display: "flex",
     justifyContent: "space-between"
   },
+
   chartBox: {
     marginTop: 20,
     padding: 15,
