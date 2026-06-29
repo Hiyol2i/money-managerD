@@ -20,15 +20,11 @@ export default function Home() {
       type,
       amount: num,
       category,
-      note
+      note,
+      time: new Date().toLocaleString()
     };
 
-    if (type === "income") {
-      setBalance(balance + num);
-    } else {
-      setBalance(balance - num);
-    }
-
+    setBalance(type === "income" ? balance + num : balance - num);
     setItems([newItem, ...items]);
 
     setAmount("");
@@ -36,56 +32,131 @@ export default function Home() {
   }
 
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", background: "#f5f6fa", minHeight: "100vh" }}>
-      
-      <div style={{ maxWidth: 420, margin: "0 auto", background: "white", padding: 20, borderRadius: 12 }}>
+    <div style={styles.bg}>
+      <div style={styles.container}>
 
-        <h1>💰 Money Manager</h1>
+        {/* Header */}
+        <h1 style={styles.title}>💎 Money Manager</h1>
 
-        <h2>ยอดคงเหลือ: {balance} บาท</h2>
+        {/* Balance Card */}
+        <div style={styles.balanceCard}>
+          <p style={{ opacity: 0.7 }}>ยอดคงเหลือ</p>
+          <h2 style={{ fontSize: 32 }}>{balance.toLocaleString()} ฿</h2>
+        </div>
 
-        <select value={type} onChange={(e) => setType(e.target.value)} style={{ width: "100%", padding: 10 }}>
-          <option value="income">➕ รายรับ</option>
-          <option value="expense">➖ รายจ่าย</option>
-        </select>
+        {/* Form Card */}
+        <div style={styles.card}>
 
-        <input
-          placeholder="จำนวนเงิน"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          style={{ width: "100%", padding: 10, marginTop: 10 }}
-        />
+          <select value={type} onChange={(e) => setType(e.target.value)} style={styles.input}>
+            <option value="income">➕ รายรับ</option>
+            <option value="expense">➖ รายจ่าย</option>
+          </select>
 
-        <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ width: "100%", padding: 10, marginTop: 10 }}>
-          <option>อาหาร</option>
-          <option>เดินทาง</option>
-          <option>การเรียน</option>
-          <option>ของใช้</option>
-        </select>
+          <input
+            placeholder="จำนวนเงิน"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            style={styles.input}
+          />
 
-        <input
-          placeholder="รายละเอียด (เช่น ค่าข้าว)"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          style={{ width: "100%", padding: 10, marginTop: 10 }}
-        />
+          <select value={category} onChange={(e) => setCategory(e.target.value)} style={styles.input}>
+            <option>🍔 อาหาร</option>
+            <option>🚗 เดินทาง</option>
+            <option>📚 การเรียน</option>
+            <option>🛍 ของใช้</option>
+          </select>
 
-        <button onClick={addItem} style={{ width: "100%", padding: 10, marginTop: 10, background: "black", color: "white" }}>
-          บันทึก
-        </button>
+          <input
+            placeholder="รายละเอียด"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            style={styles.input}
+          />
 
-        <hr />
+          <button onClick={addItem} style={styles.button}>
+            บันทึกรายการ
+          </button>
+        </div>
 
-        <h3>รายการ</h3>
-
-        {items.map((item, i) => (
-          <div key={i} style={{ padding: 10, background: "#f0f0f0", marginBottom: 8, borderRadius: 8 }}>
-            <b>{item.type === "income" ? "➕" : "➖"} {item.amount} บาท</b>
-            <div>{item.category} - {item.note}</div>
-          </div>
-        ))}
+        {/* List */}
+        <div style={{ marginTop: 20 }}>
+          {items.map((item, i) => (
+            <div key={i} style={styles.item}>
+              <div>
+                <b>
+                  {item.type === "income" ? "🟢 +" : "🔴 -"} {item.amount} ฿
+                </b>
+                <p style={{ margin: 0, opacity: 0.7 }}>
+                  {item.category} • {item.note}
+                </p>
+              </div>
+              <span style={{ fontSize: 12, opacity: 0.5 }}>
+                {item.time}
+              </span>
+            </div>
+          ))}
+        </div>
 
       </div>
     </div>
   );
 }
+
+const styles = {
+  bg: {
+    minHeight: "100vh",
+    background: "linear-gradient(135deg, #0f172a, #1e293b)",
+    display: "flex",
+    justifyContent: "center",
+    padding: 20,
+    color: "white",
+    fontFamily: "sans-serif"
+  },
+  container: {
+    width: "100%",
+    maxWidth: 420
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: 20
+  },
+  balanceCard: {
+    background: "rgba(255,255,255,0.1)",
+    backdropFilter: "blur(10px)",
+    padding: 20,
+    borderRadius: 16,
+    textAlign: "center",
+    marginBottom: 20
+  },
+  card: {
+    background: "rgba(255,255,255,0.08)",
+    backdropFilter: "blur(10px)",
+    padding: 15,
+    borderRadius: 16
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 10,
+    border: "none",
+    outline: "none"
+  },
+  button: {
+    width: "100%",
+    padding: 12,
+    borderRadius: 10,
+    border: "none",
+    background: "linear-gradient(90deg, #06b6d4, #3b82f6)",
+    color: "white",
+    fontWeight: "bold"
+  },
+  item: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: 12,
+    marginTop: 10,
+    background: "rgba(255,255,255,0.08)",
+    borderRadius: 12
+  }
+};
